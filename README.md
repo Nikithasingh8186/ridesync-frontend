@@ -43,7 +43,7 @@ npm run dev
 ```
 
 ### URLs
-- App: http://localhost:5173
-- API docs: http://127.0.0.1:8000/docs
+- App: 
+- API docs: 
 
 ## Project Structure
