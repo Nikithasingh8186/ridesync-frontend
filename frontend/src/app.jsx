@@ -2,10 +2,10 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar.jsx";
-import Login from "./pages/Login.jsx";
+import Login from "./pages/login.jsx";
 import FindRide from "./pages/FindRide.jsx";
 import OfferRide from "./pages/OfferRide.jsx";
-import MyRides from "./pages/MyRides.jsx";
+import MyRides from "./pages/MyRide.jsx";
 import Stats from "./pages/Stats.jsx";
 
 // ---------- Auth context ----------

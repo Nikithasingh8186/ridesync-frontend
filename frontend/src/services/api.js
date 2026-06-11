@@ -1,40 +1,63 @@
-import axios from 'axios'
+import axios from "axios";
 
-const api = axios.create({
-  baseURL: '/api',
-  headers: { 'Content-Type': 'application/json' }
-})
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
+const api = axios.create({ baseURL: BASE_URL });
+
+// Attach JWT token from localStorage on every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
+// Redirect to /login on 401
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     }
-    return Promise.reject(err)
+    return Promise.reject(err);
   }
-)
+);
 
-// Auth
-export const login = (data) => api.post('/auth/login', data)
-export const register = (data) => api.post('/auth/register', data)
+// ---------- Auth ----------
+export const register = (data) => api.post("/auth/register", data);
 
-// Rides
-export const findRides = (params) => api.get('/rides/find', { params })
-export const offerRide = (data) => api.post('/rides/offer', data)
-export const getMyRides = () => api.get('/rides/my')
-export const joinRide = (rideId) => api.post(`/rides/${rideId}/join`)
-export const cancelRide = (rideId) => api.delete(`/rides/${rideId}`)
+export const login = (email, password) =>
+  api.post(
+    "/auth/login",
+    new URLSearchParams({ username: email, password }),
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+  );
 
-// Stats
-export const getStats = () => api.get('/stats')
-export const getAISuggestion = () => api.get('/ai/suggestion')
+export const getMe = () => api.get("/users/me");
 
-export default api
+// ---------- Rides ----------
+export const offerRide = (data) => api.post("/rides", data);
+
+export const searchRides = (params) => api.get("/rides", { params });
+
+export const getMyRides = () => api.get("/rides/my");
+
+export const cancelRide = (rideId) => api.delete(`/rides/${rideId}`);
+
+// ---------- Requests ----------
+export const requestRide = (rideId) => api.post("/requests", { ride_id: rideId });
+
+export const getMyRequests = () => api.get("/requests/my");
+
+export const updateRequestStatus = (requestId, status) =>
+  api.patch(`/requests/${requestId}`, { status });
+
+// ---------- Stats ----------
+export const getStats = () => api.get("/stats");
+
+// ---------- AI ----------
+export const getAISuggestions = (data) => api.post("/ai/suggestions", data);
+
+export default api;
