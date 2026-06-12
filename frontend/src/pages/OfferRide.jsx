@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { offerRide } from "../services/api.js";
 
 export default function OfferRide() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -60,18 +62,18 @@ export default function OfferRide() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold text-gray-900">Offer a ride</h1>
+      <h1 className="text-xl font-semibold text-gray-900">{t("rides.offerTitle")}</h1>
 
       <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {field("Pickup address", "origin_address", "text", "Banjara Hills, Hyderabad")}
-          {field("Destination address", "destination_address", "text", "Cyberabad, Hyderabad")}
-          {field("Pickup latitude", "origin_lat", "number", "17.4126")}
-          {field("Pickup longitude", "origin_lng", "number", "78.4071")}
-          {field("Destination latitude", "destination_lat", "number", "17.4400")}
-          {field("Destination longitude", "destination_lng", "number", "78.3489")}
+          {field(t("rides.pickupAddress"), "origin_address", "text", "Banjara Hills, Hyderabad")}
+          {field(t("rides.destinationAddress"), "destination_address", "text", "Cyberabad, Hyderabad")}
+          {field(t("rides.pickupLatitude"), "origin_lat", "number", "17.4126")}
+          {field(t("rides.pickupLongitude"), "origin_lng", "number", "78.4071")}
+          {field(t("rides.destinationLatitude"), "destination_lat", "number", "17.4400")}
+          {field(t("rides.destinationLongitude"), "destination_lng", "number", "78.3489")}
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Departure time</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.departureTime")}</label>
             <input
               required type="datetime-local"
               value={form.departure_time} onChange={set("departure_time")}
@@ -79,25 +81,25 @@ export default function OfferRide() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Available seats</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.availableSeats")}</label>
             <select
               value={form.available_seats}
               onChange={set("available_seats")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             >
               {[1, 2, 3, 4].map((n) => (
-                <option key={n} value={n}>{n} seat{n > 1 ? "s" : ""}</option>
+                <option key={n} value={n}>{n} {t("rides.optional")}</option>
               ))}
             </select>
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm text-gray-600 mb-1">
-              Cost per person (₹) <span className="text-gray-400">— optional</span>
+              {t("rides.costPerPerson")} (₹) <span className="text-gray-400">— {t("rides.optional")}</span>
             </label>
             <input
               type="number" min="0" step="1"
               value={form.cost_per_person} onChange={set("cost_per_person")}
-              placeholder="Leave blank to let RideSync estimate"
+              placeholder={t("rides.optional")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -110,7 +112,7 @@ export default function OfferRide() {
           disabled={loading}
           className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
         >
-          {loading ? "Posting…" : "Post ride"}
+          {loading ? t("rides.posting") : t("rides.post")}
         </button>
       </form>
     </div>

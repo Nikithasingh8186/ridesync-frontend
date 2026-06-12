@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { searchRides } from "../services/api.js";
 import RideCard from "../components/RideCard.jsx";
 import AISuggestion from "../components/AISuggestion.jsx";
 
 export default function FindRide() {
+  const { t } = useTranslation();
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -58,12 +60,12 @@ export default function FindRide() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold text-gray-900">Find a ride</h1>
+      <h1 className="text-xl font-semibold text-gray-900">{t("rides.findTitle")}</h1>
 
       <form onSubmit={handleSearch} className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Pickup address</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.pickupAddress")}</label>
             <input
               required
               value={form.origin_address}
@@ -73,7 +75,7 @@ export default function FindRide() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Destination address</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.destinationAddress")}</label>
             <input
               required
               value={form.destination_address}
@@ -83,7 +85,7 @@ export default function FindRide() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Pickup latitude</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.pickupLatitude")}</label>
             <input
               required type="number" step="any"
               value={form.origin_lat} onChange={set("origin_lat")}
@@ -92,7 +94,7 @@ export default function FindRide() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Pickup longitude</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.pickupLongitude")}</label>
             <input
               required type="number" step="any"
               value={form.origin_lng} onChange={set("origin_lng")}
@@ -101,7 +103,7 @@ export default function FindRide() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Destination latitude</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.destinationLatitude")}</label>
             <input
               required type="number" step="any"
               value={form.destination_lat} onChange={set("destination_lat")}
@@ -110,7 +112,7 @@ export default function FindRide() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Destination longitude</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.destinationLongitude")}</label>
             <input
               required type="number" step="any"
               value={form.destination_lng} onChange={set("destination_lng")}
@@ -119,7 +121,7 @@ export default function FindRide() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm text-gray-600 mb-1">Preferred departure time</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("rides.preferredDeparture")}</label>
             <input
               required type="datetime-local"
               value={form.departure_time} onChange={set("departure_time")}
@@ -133,7 +135,7 @@ export default function FindRide() {
           disabled={loading}
           className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
         >
-          {loading ? "Searching…" : "Search rides"}
+          {loading ? t("rides.searching") : t("rides.search")}
         </button>
       </form>
 
@@ -150,12 +152,12 @@ export default function FindRide() {
       {searched && (
         <div className="space-y-3">
           <p className="text-sm text-gray-500">
-            {rides.length} ride{rides.length !== 1 ? "s" : ""} found
+            {t("rides.found", { count: rides.length })}
           </p>
           {rides.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
               <p className="text-4xl mb-3">🚗</p>
-              <p className="text-sm">No rides match your search. Try a wider time window or check back later.</p>
+              <p className="text-sm">{t("rides.noMatches")}</p>
             </div>
           ) : (
             rides.map((ride) => (

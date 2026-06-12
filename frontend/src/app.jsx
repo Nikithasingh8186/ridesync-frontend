@@ -8,6 +8,7 @@ import OfferRide from "./pages/OfferRide.jsx";
 import MyRides from "./pages/MyRide.jsx";
 import Stats from "./pages/Stats.jsx";
 import Requests from "./pages/Requests";
+import Settings from "./pages/Settings.jsx";
 // ---------- Auth context ----------
 
 export const AuthContext = createContext(null);
@@ -73,10 +74,11 @@ export default function App() {
                       <Route path="/find" element={<FindRide />} />
                       <Route path="/offer" element={<OfferRide />} />
                       <Route path="/my-rides" element={<MyRides />} />
-                      <Route path="/stats" element={<Stats />} /> 
+                      <Route path="/stats" element={<Stats />} />
                       <Route path="/requests" element={<Requests />} />
+                      <Route path="/settings" element={<Settings />} />
                     </Routes>
-                  </main> 
+                  </main>
                 </Protected>
               }
             />
