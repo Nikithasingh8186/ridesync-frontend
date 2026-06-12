@@ -1,18 +1,23 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../App.jsx";
-
-const links = [
-  { to: "/find", label: "Find a ride" },
-  { to: "/offer", label: "Offer a ride" },
-  { to: "/my-rides", label: "My rides" },
-  { to: "/stats", label: "Stats" }, 
-  { to: "/requests", label: "Requests" },
-];
+import { useLanguage } from "../i18n/LanguageProvider.jsx";
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const { logout, user } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
+
+  const links = [
+    { to: "/find", label: t("nav.find") },
+    { to: "/offer", label: t("nav.offer") },
+    { to: "/my-rides", label: t("nav.myRides") },
+    { to: "/stats", label: t("nav.stats") },
+    { to: "/requests", label: t("nav.requests") },
+    { to: "/settings", label: t("nav.settings") },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -49,6 +54,15 @@ export default function Navbar() {
 
         {/* User + logout */}
         <div className="flex items-center gap-3">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="hidden sm:block px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          >
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="te">తెలుగు</option>
+          </select>
           {user && (
             <span className="hidden sm:block text-sm text-gray-500">
               {user.full_name}
@@ -58,7 +72,7 @@ export default function Navbar() {
             onClick={handleLogout}
             className="text-sm text-gray-500 hover:text-red-500 transition-colors"
           >
-            Sign out
+            {t("nav.signOut")}
           </button>
         </div>
       </div>

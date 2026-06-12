@@ -1,15 +1,25 @@
 import axios from "axios";
+import { getAiHeaderOptions } from "./settings.js";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 const api = axios.create({ baseURL: BASE_URL });
 
-// Attach JWT token from localStorage on every request
+// Attach JWT token and language headers from localStorage on every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  const language = localStorage.getItem("ridesync_language") || "en";
+  config.headers["Accept-Language"] = language;
+
+  if (config.url?.startsWith("/ai/")) {
+    const aiHeaders = getAiHeaderOptions();
+    config.headers = { ...config.headers, ...aiHeaders };
+  }
+
   return config;
 });
 
@@ -64,5 +74,6 @@ export const getStats = () => api.get("/stats");
 
 // ---------- AI ----------
 export const getAISuggestions = (data) => api.post("/ai/suggestions", data);
+export const sendAiChat = (data) => api.post("/ai/chat", data);
 
 export default api;

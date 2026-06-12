@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { login, register, getMe } from "../services/api.js";
 import { useAuth } from "../App.jsx";
 
 export default function Login() {
+  const { t } = useTranslation();
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -29,7 +31,7 @@ export default function Login() {
       authLogin(token, userRes.data);
       navigate("/find");
     } catch (err) {
-      setError(err.response?.data?.detail || "Something went wrong");
+      setError(err.response?.data?.detail || t("auth.genericError"));
     } finally {
       setLoading(false);
     }
@@ -41,8 +43,8 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center">
           <div className="text-3xl mb-2">🚗</div>
-          <h1 className="text-xl font-semibold text-gray-900">RideSync</h1>
-          <p className="text-sm text-gray-500 mt-1">Corporate carpooling</p>
+          <h1 className="text-xl font-semibold text-gray-900">{t("app.name")}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t("app.tagline")}</p>
         </div>
 
         {/* Toggle */}
@@ -55,7 +57,7 @@ export default function Login() {
                 mode === m ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
               }`}
             >
-              {m === "login" ? "Sign in" : "Sign up"}
+              {m === "login" ? t("auth.signIn") : t("auth.signUp")}
             </button>
           ))}
         </div>
@@ -63,7 +65,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "register" && (
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Full name</label>
+              <label className="block text-sm text-gray-600 mb-1">{t("auth.fullName")}</label>
               <input
                 type="text"
                 required
@@ -75,7 +77,7 @@ export default function Login() {
             </div>
           )}
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Work email</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("auth.workEmail")}</label>
             <input
               type="email"
               required
@@ -86,7 +88,7 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Password</label>
+            <label className="block text-sm text-gray-600 mb-1">{t("auth.password")}</label>
             <input
               type="password"
               required
@@ -104,7 +106,7 @@ export default function Login() {
             disabled={loading}
             className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
           >
-            {loading ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
+            {loading ? t("auth.pleaseWait") : mode === "login" ? t("auth.signIn") : t("auth.createAccount")}
           </button>
         </form>
       </div>

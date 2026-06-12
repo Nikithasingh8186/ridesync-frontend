@@ -114,3 +114,11 @@ class AISuggestionRequest(BaseModel):
     destination_lat: float
     destination_lng: float
     preferred_departure: str  # e.g. "08:30"
+
+
+class AIChatRequest(BaseModel):
+    question: str
+    origin_lat: Optional[float] = None
+    origin_lng: Optional[float] = None
+    destination_lat: Optional[float] = None
+    destination_lng: Optional[float] = None

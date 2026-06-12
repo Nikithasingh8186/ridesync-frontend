@@ -34,6 +34,7 @@ import schemas
 from database import engine, get_db, init_db, settings
 from matching import find_matching_rides, estimate_cost_share, estimate_co2_saved_kg, haversine
 from ai_suggestions import get_ride_suggestions
+from ai_chat import get_ai_answer
 
 REQUEST_ACTIVE_STATUSES = (
     models.RequestStatus.pending.value,

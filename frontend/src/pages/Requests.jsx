@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getMyRequests } from "../services/api";
 
 function statusClass(status) {
@@ -11,6 +12,7 @@ function statusClass(status) {
 }
 
 export default function Requests() {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,7 +24,7 @@ export default function Requests() {
       const res = await getMyRequests();
       setRequests(res.data);
     } catch (err) {
-      setError(err.response?.data?.detail || "Error loading requests");
+      setError(err.response?.data?.detail || t("requests.error"));
     } finally {
       if (!silent) setLoading(false);
     }
@@ -34,15 +36,15 @@ export default function Requests() {
     return () => clearInterval(intervalId);
   }, []);
 
-  if (loading) return <p className="text-sm text-gray-400 animate-pulse">Loading requests...</p>;
+  if (loading) return <p className="text-sm text-gray-400 animate-pulse">{t("requests.loading")}</p>;
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-gray-900">My requests</h1>
+      <h1 className="text-xl font-semibold text-gray-900">{t("requests.title")}</h1>
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       {requests.length === 0 ? (
-        <p className="text-sm text-gray-400">No requests found.</p>
+        <p className="text-sm text-gray-400">{t("requests.none")}</p>
       ) : (
         <div className="space-y-3">
           {requests.map((request) => (
@@ -53,7 +55,7 @@ export default function Requests() {
                     {request.ride.origin_address} to {request.ride.destination_address}
                   </p>
                   <p className="text-xs text-gray-400">
-                    Driver: {request.ride.driver?.full_name || "Unknown"}
+                    {t("requests.driver", { name: request.ride.driver?.full_name || t("requests.unknownDriver") })}
                   </p>
                 </div>
                 <span
@@ -61,7 +63,7 @@ export default function Requests() {
                     request.status
                   )}`}
                 >
-                  {request.status.replace("_", " ")}
+                  {t(`status.${request.status}`)}
                 </span>
               </div>
             </div>
