@@ -35,6 +35,23 @@ from database import engine, get_db, init_db, settings
 from matching import find_matching_rides, estimate_cost_share, estimate_co2_saved_kg, haversine
 from ai_suggestions import get_ride_suggestions
 
+REQUEST_ACTIVE_STATUSES = (
+    models.RequestStatus.pending.value,
+    models.RequestStatus.accepted.value,
+    models.RequestStatus.in_progress.value,
+)
+
+RIDE_STATUS_TRANSITIONS = {
+    models.RideStatus.pending.value: {
+        models.RideStatus.in_progress.value,
+        models.RideStatus.cancelled.value,
+    },
+    models.RideStatus.in_progress.value: {
+        models.RideStatus.completed.value,
+        models.RideStatus.cancelled.value,
+    },
+}
+
 # ---------- App setup ----------
 
 app = FastAPI(title="RideSync API", version="1.0.0")
@@ -153,13 +170,17 @@ def list_rides(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    if all(v is not None for v in [origin_lat, origin_lng, destination_lat, destination_lng, departure_time]):
+    if all(
+        v is not None
+        for v in [origin_lat, origin_lng, destination_lat, destination_lng, departure_time]
+    ):
         return find_matching_rides(
             db, origin_lat, origin_lng, destination_lat, destination_lng,
             departure_time, exclude_user_id=current_user.id,
         )
     return db.query(models.Ride).filter(
         models.Ride.is_active == True,
+        models.Ride.status == models.RideStatus.pending.value,
         models.Ride.driver_id != current_user.id,
     ).all()
 
@@ -184,7 +205,66 @@ def cancel_ride(
     if ride.driver_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your ride")
     ride.is_active = False
+    ride.status = models.RideStatus.cancelled.value
+    for req in ride.requests:
+        if req.status in REQUEST_ACTIVE_STATUSES:
+            req.status = models.RequestStatus.cancelled.value
     db.commit()
+
+
+@app.patch("/rides/{ride_id}/status", response_model=schemas.RideOut)
+def update_ride_status(
+    ride_id: int,
+    payload: schemas.RideStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    ride = db.query(models.Ride).filter(models.Ride.id == ride_id).with_for_update().first()
+    if not ride:
+        raise HTTPException(status_code=404, detail="Ride not found")
+    if ride.driver_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the driver can update this ride")
+
+    try:
+        next_status = models.RideStatus(payload.status).value
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid ride status")
+
+    allowed = RIDE_STATUS_TRANSITIONS.get(ride.status, set())
+    if next_status not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot change ride from {ride.status} to {next_status}",
+        )
+    if next_status == models.RideStatus.in_progress.value and not any(
+        req.status == models.RequestStatus.accepted.value for req in ride.requests
+    ):
+        raise HTTPException(status_code=400, detail="Accept at least one request before starting")
+
+    ride.status = next_status
+    ride.is_active = next_status == models.RideStatus.pending.value
+
+    if next_status == models.RideStatus.in_progress.value:
+        for req in ride.requests:
+            if req.status == models.RequestStatus.accepted.value:
+                req.status = models.RequestStatus.in_progress.value
+    elif next_status == models.RideStatus.completed.value:
+        for req in ride.requests:
+            if req.status in (
+                models.RequestStatus.accepted.value,
+                models.RequestStatus.in_progress.value,
+            ):
+                req.status = models.RequestStatus.completed.value
+            elif req.status == models.RequestStatus.pending.value:
+                req.status = models.RequestStatus.cancelled.value
+    elif next_status == models.RideStatus.cancelled.value:
+        for req in ride.requests:
+            if req.status in REQUEST_ACTIVE_STATUSES:
+                req.status = models.RequestStatus.cancelled.value
+
+    db.commit()
+    db.refresh(ride)
+    return ride
 
 
 # ---------- Ride request routes ----------
@@ -196,7 +276,7 @@ def create_request(
     current_user: models.User = Depends(get_current_user),
 ):
     ride = db.query(models.Ride).filter(models.Ride.id == payload.ride_id).first()
-    if not ride or not ride.is_active:
+    if not ride or not ride.is_active or ride.status != models.RideStatus.pending.value:
         raise HTTPException(status_code=404, detail="Ride not found or inactive")
     if ride.driver_id == current_user.id:
         raise HTTPException(status_code=400, detail="You cannot request your own ride")
@@ -204,6 +284,7 @@ def create_request(
     existing = db.query(models.RideRequest).filter(
         models.RideRequest.ride_id == payload.ride_id,
         models.RideRequest.passenger_id == current_user.id,
+        models.RideRequest.status.in_(REQUEST_ACTIVE_STATUSES),
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Already requested this ride")
@@ -225,6 +306,18 @@ def my_requests(
     ).all()
 
 
+@app.get("/requests/received", response_model=list[schemas.RideRequestOut])
+def received_requests(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    return (
+        db.query(models.RideRequest)
+        .join(models.Ride)
+        .filter(models.Ride.driver_id == current_user.id)
+        .all()
+    )
+
 @app.patch("/requests/{request_id}", response_model=schemas.RideRequestOut)
 def update_request_status(
     request_id: int,
@@ -232,18 +325,51 @@ def update_request_status(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    req = db.query(models.RideRequest).filter(models.RideRequest.id == request_id).first()
+    req = (
+        db.query(models.RideRequest)
+        .filter(models.RideRequest.id == request_id)
+        .with_for_update()
+        .first()
+    )
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
-    if req.ride.driver_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only the driver can update this request")
 
-    if payload.status not in ("accepted", "declined"):
-        raise HTTPException(status_code=400, detail="Status must be 'accepted' or 'declined'")
+    try:
+        next_status = models.RequestStatus(payload.status).value
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid request status")
 
-    req.status = payload.status
-    if payload.status == "accepted":
-        req.ride.available_seats = max(0, req.ride.available_seats - 1)
+    if next_status not in (
+        models.RequestStatus.accepted.value,
+        models.RequestStatus.declined.value,
+        models.RequestStatus.cancelled.value,
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Status must be accepted, declined, or cancelled",
+        )
+
+    is_driver = req.ride.driver_id == current_user.id
+    is_passenger_cancel = (
+        req.passenger_id == current_user.id
+        and next_status == models.RequestStatus.cancelled.value
+        and req.status in (models.RequestStatus.pending.value, models.RequestStatus.accepted.value)
+    )
+    if not is_driver and not is_passenger_cancel:
+        raise HTTPException(status_code=403, detail="Not allowed to update this request")
+    if is_driver and req.status != models.RequestStatus.pending.value:
+        raise HTTPException(status_code=400, detail=f"Request is already {req.status}")
+    if req.ride.status != models.RideStatus.pending.value or not req.ride.is_active:
+        raise HTTPException(status_code=400, detail="Ride is not accepting request changes")
+    if next_status == models.RequestStatus.accepted.value and req.ride.available_seats <= 0:
+        raise HTTPException(status_code=400, detail="No seats available")
+
+    was_accepted = req.status == models.RequestStatus.accepted.value
+    req.status = next_status
+    if next_status == models.RequestStatus.accepted.value:
+        req.ride.available_seats -= 1
+    elif next_status == models.RequestStatus.cancelled.value and was_accepted:
+        req.ride.available_seats += 1
     db.commit()
     db.refresh(req)
     return req
@@ -256,31 +382,88 @@ def get_stats(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    accepted_requests = db.query(models.RideRequest).filter(
-        models.RideRequest.passenger_id == current_user.id,
-        models.RideRequest.status == "accepted",
-    ).all()
+    now = datetime.utcnow()
+    periods = {
+        "weekly": now - timedelta(days=7),
+        "monthly": now - timedelta(days=30),
+        "total": None,
+    }
 
-    total_rides = len(accepted_requests)
-    total_savings = 0.0
-    co2_saved = 0.0
-    km_shared = 0.0
-
-    for req in accepted_requests:
-        ride = req.ride
-        dist = haversine(
-            ride.origin_lat, ride.origin_lng,
-            ride.destination_lat, ride.destination_lng,
+    def ride_distance(ride: models.Ride) -> float:
+        return haversine(
+            ride.origin_lat,
+            ride.origin_lng,
+            ride.destination_lat,
+            ride.destination_lng,
         )
-        km_shared += dist
-        total_savings += estimate_cost_share(dist, passengers=2)
-        co2_saved += estimate_co2_saved_kg(dist, passengers=2)
+
+    def build_period_stats(start: Optional[datetime]) -> schemas.StatsPeriod:
+        passenger_requests_query = db.query(models.RideRequest).filter(
+            models.RideRequest.passenger_id == current_user.id,
+            models.RideRequest.status == models.RequestStatus.completed.value,
+        )
+        driver_rides_query = db.query(models.Ride).filter(
+            models.Ride.driver_id == current_user.id,
+            models.Ride.status == models.RideStatus.completed.value,
+        )
+        if start:
+            passenger_requests_query = passenger_requests_query.filter(
+                models.RideRequest.created_at >= start
+            )
+            driver_rides_query = driver_rides_query.filter(models.Ride.created_at >= start)
+
+        passenger_requests = passenger_requests_query.all()
+        driver_rides = driver_rides_query.all()
+
+        total_rides = len(passenger_requests) + len(driver_rides)
+        total_distance = 0.0
+        co2_saved = 0.0
+        fuel_saved = 0.0
+        total_savings = 0.0
+        shared_segments = 0
+
+        for req in passenger_requests:
+            distance = ride_distance(req.ride)
+            total_distance += distance
+            co2_saved += distance * 0.21
+            fuel_saved += distance / 14.0
+            total_savings += estimate_cost_share(distance, passengers=2)
+            shared_segments += 1
+
+        for ride in driver_rides:
+            completed_passengers = [
+                req for req in ride.requests if req.status == models.RequestStatus.completed.value
+            ]
+            if not completed_passengers:
+                continue
+            distance = ride_distance(ride)
+            passenger_count = len(completed_passengers)
+            total_distance += distance
+            co2_saved += estimate_co2_saved_kg(distance, passengers=passenger_count + 1)
+            fuel_saved += (distance / 14.0) * passenger_count
+            total_savings += estimate_cost_share(distance, passengers=passenger_count + 1)
+            shared_segments += passenger_count
+
+        traffic_reduction = 0.0
+        if total_rides:
+            traffic_reduction = min(
+                100.0,
+                (shared_segments / (total_rides + shared_segments)) * 100,
+            )
+
+        return schemas.StatsPeriod(
+            total_rides=total_rides,
+            total_distance_km=round(total_distance, 2),
+            co2_saved_kg=round(co2_saved, 2),
+            fuel_saved_liters=round(fuel_saved, 2),
+            traffic_reduction_percent=round(traffic_reduction, 1),
+            total_savings=round(total_savings, 2),
+        )
 
     return schemas.UserStats(
-        total_rides=total_rides,
-        total_savings=round(total_savings, 2),
-        co2_saved_kg=round(co2_saved, 3),
-        km_shared=round(km_shared, 2),
+        weekly=build_period_stats(periods["weekly"]),
+        monthly=build_period_stats(periods["monthly"]),
+        total=build_period_stats(periods["total"]),
     )
 
 
@@ -293,7 +476,10 @@ def ai_suggestions(
     current_user: models.User = Depends(get_current_user),
 ):
     from datetime import date
-    today = datetime.combine(date.today(), datetime.strptime(payload.preferred_departure, "%H:%M").time())
+    today = datetime.combine(
+        date.today(),
+        datetime.strptime(payload.preferred_departure, "%H:%M").time(),
+    )
 
     matches = find_matching_rides(
         db,

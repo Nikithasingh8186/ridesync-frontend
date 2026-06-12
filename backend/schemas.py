@@ -58,6 +58,7 @@ class RideOut(BaseModel):
     departure_time: datetime
     available_seats: int
     cost_per_person: Optional[float]
+    status: str
     is_active: bool
     created_at: datetime
 
@@ -81,16 +82,28 @@ class RideRequestOut(BaseModel):
 
 
 class RideRequestStatusUpdate(BaseModel):
-    status: str  # "accepted" | "declined"
+    status: str  # "accepted" | "declined" | "cancelled"
+
+
+class RideStatusUpdate(BaseModel):
+    status: str  # "in_progress" | "completed" | "cancelled"
 
 
 # ---------- Stats ----------
 
-class UserStats(BaseModel):
+class StatsPeriod(BaseModel):
     total_rides: int
-    total_savings: float
+    total_distance_km: float
     co2_saved_kg: float
-    km_shared: float
+    fuel_saved_liters: float
+    traffic_reduction_percent: float
+    total_savings: float
+
+
+class UserStats(BaseModel):
+    weekly: StatsPeriod
+    monthly: StatsPeriod
+    total: StatsPeriod
 
 
 # ---------- AI ----------
