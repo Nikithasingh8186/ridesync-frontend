@@ -13,7 +13,7 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from models import Ride, User
+from models import Ride, RideStatus, User
 
 
 # Configuration constants
@@ -96,6 +96,7 @@ def find_matching_rides(
         db.query(Ride)
         .filter(
             Ride.is_active == True,
+            Ride.status == RideStatus.pending.value,
             Ride.driver_id != exclude_user_id,
             Ride.departure_time >= window_start,
             Ride.departure_time <= window_end,
@@ -108,7 +109,12 @@ def find_matching_rides(
     matches = []
     for ride in candidates:
         origin_dist = haversine(origin_lat, origin_lng, ride.origin_lat, ride.origin_lng)
-        dest_dist = haversine(destination_lat, destination_lng, ride.destination_lat, ride.destination_lng)
+        dest_dist = haversine(
+            destination_lat,
+            destination_lng,
+            ride.destination_lat,
+            ride.destination_lng,
+        )
         if origin_dist <= ORIGIN_RADIUS_KM and dest_dist <= DESTINATION_RADIUS_KM:
             matches.append((origin_dist, ride))
 

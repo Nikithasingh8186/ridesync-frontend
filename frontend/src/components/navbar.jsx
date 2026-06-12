@@ -6,7 +6,8 @@ const links = [
   { to: "/find", label: "Find a ride" },
   { to: "/offer", label: "Offer a ride" },
   { to: "/my-rides", label: "My rides" },
-  { to: "/stats", label: "Stats" },
+  { to: "/stats", label: "Stats" }, 
+  { to: "/requests", label: "Requests" },
 ];
 
 export default function Navbar() {

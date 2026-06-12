@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { searchRides } from "../services/api.js";
 import RideCard from "../components/RideCard.jsx";
 import AISuggestion from "../components/AISuggestion.jsx";
@@ -19,24 +19,35 @@ export default function FindRide() {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  async function handleSearch(e) {
-    e.preventDefault();
-    setLoading(true);
+  const buildParams = () => ({
+    origin_lat: parseFloat(form.origin_lat),
+    origin_lng: parseFloat(form.origin_lng),
+    destination_lat: parseFloat(form.destination_lat),
+    destination_lng: parseFloat(form.destination_lng),
+    departure_time: new Date(form.departure_time).toISOString(),
+  });
+
+  async function loadRides({ silent = false } = {}) {
+    if (!silent) setLoading(true);
     try {
-      const params = {
-        origin_lat: parseFloat(form.origin_lat),
-        origin_lng: parseFloat(form.origin_lng),
-        destination_lat: parseFloat(form.destination_lat),
-        destination_lng: parseFloat(form.destination_lng),
-        departure_time: new Date(form.departure_time).toISOString(),
-      };
-      const res = await searchRides(params);
+      const res = await searchRides(buildParams());
       setRides(res.data);
       setSearched(true);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
+
+  async function handleSearch(e) {
+    e.preventDefault();
+    await loadRides();
+  }
+
+  useEffect(() => {
+    if (!searched) return undefined;
+    const intervalId = setInterval(() => loadRides({ silent: true }), 5000);
+    return () => clearInterval(intervalId);
+  }, [searched, form.origin_lat, form.origin_lng, form.destination_lat, form.destination_lng, form.departure_time]);
 
   const preferredTime = form.departure_time
     ? new Date(form.departure_time).toTimeString().slice(0, 5)
@@ -148,7 +159,7 @@ export default function FindRide() {
             </div>
           ) : (
             rides.map((ride) => (
-              <RideCard key={ride.id} ride={ride} mode="find" onRefresh={() => {}} />
+              <RideCard key={ride.id} ride={ride} mode="find" onRefresh={loadRides} />
             ))
           )}
         </div>

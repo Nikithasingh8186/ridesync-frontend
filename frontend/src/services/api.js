@@ -46,10 +46,15 @@ export const getMyRides = () => api.get("/rides/my");
 
 export const cancelRide = (rideId) => api.delete(`/rides/${rideId}`);
 
+export const updateRideStatus = (rideId, status) =>
+  api.patch(`/rides/${rideId}/status`, { status });
+
 // ---------- Requests ----------
 export const requestRide = (rideId) => api.post("/requests", { ride_id: rideId });
 
 export const getMyRequests = () => api.get("/requests/my");
+
+export const getReceivedRequests = () => api.get("/requests/received");
 
 export const updateRequestStatus = (requestId, status) =>
   api.patch(`/requests/${requestId}`, { status });
