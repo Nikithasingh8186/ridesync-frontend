@@ -11,6 +11,7 @@
     "myRides": "My rides",
     "stats": "Stats",
     "requests": "Requests",
+    "ai": "AI assistant",
     "settings": "Settings",
     "signOut": "Sign out"
   },
@@ -22,7 +23,10 @@
     "password": "Password",
     "createAccount": "Create account",
     "pleaseWait": "Please wait...",
-    "genericError": "Something went wrong"
+    "genericError": "Something went wrong",
+    "fullNamePlaceholder": "Priya Sharma",
+    "emailPlaceholder": "you@company.com",
+    "passwordPlaceholder": "••••••••"
   },
   "rides": {
     "findTitle": "Find a ride",
@@ -33,6 +37,10 @@
     "pickupLongitude": "Pickup longitude",
     "destinationLatitude": "Destination latitude",
     "destinationLongitude": "Destination longitude",
+    "pickupAddressPlaceholder": "Banjara Hills, Hyderabad",
+    "destinationAddressPlaceholder": "Cyberabad, Hyderabad",
+    "latitudePlaceholder": "17.4126",
+    "longitudePlaceholder": "78.4071",
     "preferredDeparture": "Preferred departure time",
     "departureTime": "Departure time",
     "availableSeats": "Available seats",
@@ -117,7 +125,8 @@
     "chatPlaceholder": "Ask about cheapest rides, timing, or reducing travel cost",
     "send": "Send",
     "chatFallback": "Ask me about ride cost, timing, matching, or eco impact.",
-    "chatError": "Could not reach the AI assistant."
+    "chatError": "Could not reach the AI assistant.",
+    "responseTitle": "AI response"
   },
   "settings": {
     "title": "Settings",

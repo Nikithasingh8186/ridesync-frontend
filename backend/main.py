@@ -22,7 +22,7 @@ Routes:
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -475,7 +475,12 @@ def ai_suggestions(
     payload: schemas.AISuggestionRequest,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
+    x_ai_mode: str = Header(default="cloud", alias="X-AI-Mode"),
+    x_ai_local_endpoint: str = Header(default="http://localhost:11434", alias="X-AI-Local-Endpoint"),
+    x_ai_byok_key: str | None = Header(default=None, alias="X-AI-BYOK-Key"),
+    accept_language: str = Header(default="en", alias="Accept-Language"),
 ):
+    preferred_language = accept_language.split(",")[0].split("-")[0].strip().lower() or "en"
     from datetime import date
     today = datetime.combine(
         date.today(),
@@ -507,6 +512,30 @@ def ai_suggestions(
         destination_address=f"{payload.destination_lat},{payload.destination_lng}",
         preferred_departure=payload.preferred_departure,
         available_rides=rides_for_ai,
+        language=preferred_language,
+        ai_mode=x_ai_mode,
+        local_endpoint=x_ai_local_endpoint,
+        byok_key=x_ai_byok_key,
     )
 
     return {"matches": rides_for_ai, "suggestion": suggestion}
+
+
+@app.post("/ai/chat")
+def ai_chat(
+    payload: schemas.AIChatRequest,
+    current_user: models.User = Depends(get_current_user),
+    x_ai_mode: str = Header(default="cloud", alias="X-AI-Mode"),
+    x_ai_local_endpoint: str = Header(default="http://localhost:11434", alias="X-AI-Local-Endpoint"),
+    x_ai_byok_key: str | None = Header(default=None, alias="X-AI-BYOK-Key"),
+    accept_language: str = Header(default="en", alias="Accept-Language"),
+):
+    preferred_language = accept_language.split(",")[0].split("-")[0].strip().lower() or "en"
+    answer_payload = get_ai_answer(
+        payload.question,
+        language=preferred_language,
+        ai_mode=x_ai_mode,
+        local_endpoint=x_ai_local_endpoint,
+        byok_key=x_ai_byok_key,
+    )
+    return {"answer": answer_payload["answer"]}

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getMyRides, getMyRequests, getReceivedRequests } from "../services/api.js";
 import RideCard from "../components/RideCard.jsx";
 
 export default function MyRides() {
+  const { t } = useTranslation();
   const [rides, setRides] = useState([]);
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [myRequests, setMyRequests] = useState([]);
@@ -39,12 +41,12 @@ export default function MyRides() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold text-gray-900">My rides</h1>
+      <h1 className="text-xl font-semibold text-gray-900">{t("rides.myRidesTitle")}</h1>
 
       <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
         {[
-          { key: "offered", label: `Rides I'm driving (${rides.length})` },
-          { key: "joined", label: `Rides I've joined (${myRequests.length})` },
+          { key: "offered", label: t("rides.driving", { count: rides.length }) },
+          { key: "joined", label: t("rides.joined", { count: myRequests.length }) },
         ].map(({ key, label }) => (
           <button
             key={key}
@@ -59,10 +61,14 @@ export default function MyRides() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-gray-400 animate-pulse">Loading...</p>
+        <p className="text-sm text-gray-400 animate-pulse">{t("common.loading")}</p>
       ) : tab === "offered" ? (
         rides.length === 0 ? (
-          <EmptyState message="You have not offered any rides yet." cta="Offer a ride" href="/offer" />
+          <EmptyState
+            message={t("rides.noOffered")}
+            cta={t("nav.offer")}
+            href="/offer"
+          />
         ) : (
           <div className="space-y-3">
             {rides.map((ride) => (
@@ -77,7 +83,11 @@ export default function MyRides() {
           </div>
         )
       ) : myRequests.length === 0 ? (
-        <EmptyState message="You have not joined any rides yet." cta="Find a ride" href="/find" />
+        <EmptyState
+          message={t("rides.noJoined")}
+          cta={t("nav.find")}
+          href="/find"
+        />
       ) : (
         <div className="space-y-3">
           {myRequests.map((req) => (

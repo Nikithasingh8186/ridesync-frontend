@@ -39,7 +39,7 @@ export default function OfferRide() {
       });
       navigate("/my-rides");
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to post ride");
+      setError(err.response?.data?.detail || t("rides.failedPost"));
     } finally {
       setLoading(false);
     }
@@ -66,12 +66,12 @@ export default function OfferRide() {
 
       <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {field(t("rides.pickupAddress"), "origin_address", "text", "Banjara Hills, Hyderabad")}
-          {field(t("rides.destinationAddress"), "destination_address", "text", "Cyberabad, Hyderabad")}
-          {field(t("rides.pickupLatitude"), "origin_lat", "number", "17.4126")}
-          {field(t("rides.pickupLongitude"), "origin_lng", "number", "78.4071")}
-          {field(t("rides.destinationLatitude"), "destination_lat", "number", "17.4400")}
-          {field(t("rides.destinationLongitude"), "destination_lng", "number", "78.3489")}
+          {field(t("rides.pickupAddress"), "origin_address", "text", t("rides.pickupAddressPlaceholder"))}
+          {field(t("rides.destinationAddress"), "destination_address", "text", t("rides.destinationAddressPlaceholder"))}
+          {field(t("rides.pickupLatitude"), "origin_lat", "number", t("rides.latitudePlaceholder"))}
+          {field(t("rides.pickupLongitude"), "origin_lng", "number", t("rides.longitudePlaceholder"))}
+          {field(t("rides.destinationLatitude"), "destination_lat", "number", t("rides.latitudePlaceholder"))}
+          {field(t("rides.destinationLongitude"), "destination_lng", "number", t("rides.longitudePlaceholder"))}
           <div>
             <label className="block text-sm text-gray-600 mb-1">{t("rides.departureTime")}</label>
             <input

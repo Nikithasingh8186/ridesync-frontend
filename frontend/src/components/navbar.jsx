@@ -16,6 +16,7 @@ export default function Navbar() {
     { to: "/my-rides", label: t("nav.myRides") },
     { to: "/stats", label: t("nav.stats") },
     { to: "/requests", label: t("nav.requests") },
+    { to: "/ai", label: t("nav.ai") },
     { to: "/settings", label: t("nav.settings") },
   ];
 

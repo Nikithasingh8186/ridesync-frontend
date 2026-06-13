@@ -9,6 +9,7 @@ import MyRides from "./pages/MyRide.jsx";
 import Stats from "./pages/Stats.jsx";
 import Requests from "./pages/Requests";
 import Settings from "./pages/Settings.jsx";
+import AI from "./pages/AI.jsx";
 // ---------- Auth context ----------
 
 export const AuthContext = createContext(null);
@@ -76,6 +77,7 @@ export default function App() {
                       <Route path="/my-rides" element={<MyRides />} />
                       <Route path="/stats" element={<Stats />} />
                       <Route path="/requests" element={<Requests />} />
+                      <Route path="/ai" element={<AI />} />
                       <Route path="/settings" element={<Settings />} />
                     </Routes>
                   </main>

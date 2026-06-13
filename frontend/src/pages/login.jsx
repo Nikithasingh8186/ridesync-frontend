@@ -71,7 +71,7 @@ export default function Login() {
                 required
                 value={form.full_name}
                 onChange={set("full_name")}
-                placeholder="Priya Sharma"
+                placeholder={t("auth.fullNamePlaceholder")}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
               />
             </div>
@@ -83,7 +83,7 @@ export default function Login() {
               required
               value={form.email}
               onChange={set("email")}
-              placeholder="you@company.com"
+              placeholder={t("auth.emailPlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -94,7 +94,7 @@ export default function Login() {
               required
               value={form.password}
               onChange={set("password")}
-              placeholder="••••••••"
+              placeholder={t("auth.passwordPlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>

@@ -11,6 +11,7 @@
     "myRides": "मेरी राइड्स",
     "stats": "स्टैट्स",
     "requests": "अनुरोध",
+    "ai": "AI सहायक",
     "settings": "सेटिंग्स",
     "signOut": "साइन आउट"
   },
@@ -22,7 +23,10 @@
     "password": "पासवर्ड",
     "createAccount": "अकाउंट बनाएं",
     "pleaseWait": "कृपया प्रतीक्षा करें...",
-    "genericError": "कुछ गलत हो गया"
+    "genericError": "कुछ गलत हो गया",
+    "fullNamePlaceholder": "प्रिया शर्मा",
+    "emailPlaceholder": "aapka@company.com",
+    "passwordPlaceholder": "••••••••"
   },
   "rides": {
     "findTitle": "राइड खोजें",
@@ -117,7 +121,8 @@
     "chatPlaceholder": "सस्ता राइड, बेहतर समय, या लागत कम करने के बारे में पूछें",
     "send": "भेजें",
     "chatFallback": "राइड लागत, समय, मिलान, या इको प्रभाव के बारे में पूछें।",
-    "chatError": "AI सहायक से जुड़ने में विफल।"
+    "chatError": "AI सहायक से जुड़ने में विफल।",
+    "responseTitle": "AI उत्तर"
   },
   "settings": {
     "title": "सेटिंग्स",

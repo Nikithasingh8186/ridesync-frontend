@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
     anthropic_api_key: str = ""
+    openai_api_url: str = "https://api.openai.com/v1/chat/completions"
     frontend_url: str = "http://localhost:5173"
 
     class Config:

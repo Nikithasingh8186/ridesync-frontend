@@ -70,7 +70,7 @@ export default function FindRide() {
               required
               value={form.origin_address}
               onChange={set("origin_address")}
-              placeholder="Banjara Hills, Hyderabad"
+              placeholder={t("rides.pickupAddressPlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -80,7 +80,7 @@ export default function FindRide() {
               required
               value={form.destination_address}
               onChange={set("destination_address")}
-              placeholder="Cyberabad, Hyderabad"
+              placeholder={t("rides.destinationAddressPlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -89,7 +89,7 @@ export default function FindRide() {
             <input
               required type="number" step="any"
               value={form.origin_lat} onChange={set("origin_lat")}
-              placeholder="17.4126"
+              placeholder={t("rides.latitudePlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -98,7 +98,7 @@ export default function FindRide() {
             <input
               required type="number" step="any"
               value={form.origin_lng} onChange={set("origin_lng")}
-              placeholder="78.4071"
+              placeholder={t("rides.longitudePlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -107,7 +107,7 @@ export default function FindRide() {
             <input
               required type="number" step="any"
               value={form.destination_lat} onChange={set("destination_lat")}
-              placeholder="17.4400"
+              placeholder={t("rides.latitudePlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -116,7 +116,7 @@ export default function FindRide() {
             <input
               required type="number" step="any"
               value={form.destination_lng} onChange={set("destination_lng")}
-              placeholder="78.3489"
+              placeholder={t("rides.longitudePlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>

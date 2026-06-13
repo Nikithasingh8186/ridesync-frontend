@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getAISuggestions } from "../services/api.js";
 
 /**
@@ -15,6 +16,7 @@ export default function AISuggestion({
   preferredDeparture,
   onPickSuggestion,
 }) {
+  const { t } = useTranslation();
   const [suggestion, setSuggestion] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -33,7 +35,7 @@ export default function AISuggestion({
       });
       setSuggestion(res.data.suggestion);
     } catch (e) {
-      setError("Could not load AI suggestions right now.");
+      setError(t("ai.error"));
     } finally {
       setLoading(false);
     }
@@ -46,12 +48,12 @@ export default function AISuggestion({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-lg">✨</span>
-          <p className="text-sm font-medium text-indigo-800">AI commute suggestions</p>
+          <p className="text-sm font-medium text-indigo-800">{t("ai.title")}</p>
         </div>
         <button
           onClick={() => setDismissed(true)}
           className="text-indigo-300 hover:text-indigo-500 text-lg leading-none"
-          aria-label="Dismiss"
+          aria-label={t("ai.dismiss")}
         >
           ×
         </button>
@@ -62,12 +64,12 @@ export default function AISuggestion({
           onClick={fetchSuggestion}
           className="w-full py-2 text-sm font-medium text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors"
         >
-          Get personalised suggestions
+          {t("ai.getSuggestions")}
         </button>
       )}
 
       {loading && (
-        <p className="text-sm text-indigo-500 animate-pulse">Thinking…</p>
+        <p className="text-sm text-indigo-500 animate-pulse">{t("ai.thinking")}</p>
       )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
@@ -92,7 +94,7 @@ export default function AISuggestion({
               onClick={() => onPickSuggestion?.(suggestion.top_pick_id)}
               className="w-full py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
             >
-              View recommended ride
+              {t("ai.viewRecommended")}
             </button>
           )}
         </div>

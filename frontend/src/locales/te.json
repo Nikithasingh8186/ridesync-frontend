@@ -11,6 +11,7 @@
     "myRides": "నా రైడ్లు",
     "stats": "స్టాట్స్",
     "requests": "అనుకోవడాలు",
+    "ai": "AI సహాయకుడు",
     "settings": "సెట్టింగ్స్",
     "signOut": "సైన్ అవుట్"
   },
@@ -22,7 +23,10 @@
     "password": "పాస్వర్డ్",
     "createAccount": "అకౌంట్ సృష్టించండి",
     "pleaseWait": "దయచేసి వేచిచూడండి...",
-    "genericError": "ఏదో సమస్య వచ్చింది"
+    "genericError": "ఏదో సమస్య వచ్చింది",
+    "fullNamePlaceholder": "ప్రియా శర్మ",
+    "emailPlaceholder": "mee@company.com",
+    "passwordPlaceholder": "••••••••"
   },
   "rides": {
     "findTitle": "రైడ్ కనుక్కోండి",
@@ -117,7 +121,8 @@
     "chatPlaceholder": "చౌకైన రైడ్స్, మంచి సమయం, లేదా ఖర్చును తగ్గించడంపై అడగండి",
     "send": "పంపండి",
     "chatFallback": "రైడ్ ఖర్చు, సమయం, మ్యాచ్, లేదా పర్యావరణ ప్రభావం గురించి అడగండి.",
-    "chatError": "AI సహాయకుడితో కనెక్ట్ కావడంలో విఫలమైంది।"
+    "chatError": "AI సహాయకుడితో కనెక్ట్ కావడంలో విఫలమైంది।",
+    "responseTitle": "AI జవాబు"
   },
   "settings": {
     "title": "సెట్టింగ్స్",

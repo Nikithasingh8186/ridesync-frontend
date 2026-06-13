@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   requestRide,
   updateRequestStatus,
@@ -15,11 +16,13 @@ const badgeClass = {
   declined: "bg-red-50 text-red-600",
 };
 
-function formatStatus(status) {
-  return (status || "pending").replace("_", " ");
+function formatStatus(status, t) {
+  const key = `status.${status || "pending"}`;
+  return t(key, status?.replace("_", " ") || "pending");
 }
 
 export default function RideCard({ ride, mode = "find", requests = [], onRefresh }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [requested, setRequested] = useState(false);
@@ -49,20 +52,20 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
     runAction(async () => {
       await requestRide(ride.id);
       setRequested(true);
-    }, "Failed to send request");
+    }, t("rides.failedSend"));
   }
 
   function handleCancel() {
-    if (!confirm("Cancel this ride?")) return;
-    runAction(() => cancelRide(ride.id), "Failed to cancel");
+    if (!confirm(t("rides.confirmCancelRide"))) return;
+    runAction(() => cancelRide(ride.id), t("rides.failedCancel"));
   }
 
   function handleRequestAction(requestId, status) {
-    runAction(() => updateRequestStatus(requestId, status), "Failed to update request");
+    runAction(() => updateRequestStatus(requestId, status), t("rides.failedUpdateRequest"));
   }
 
   function handleRideStatus(status) {
-    runAction(() => updateRideStatus(ride.id, status), "Failed to update ride");
+    runAction(() => updateRideStatus(ride.id, status), t("rides.failedUpdateRide"));
   }
 
   const rideStatus = ride.status || "pending";
@@ -82,10 +85,10 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
               badgeClass[rideStatus] || badgeClass.pending
             }`}
           >
-            {formatStatus(rideStatus)}
+            {formatStatus(rideStatus, t)}
           </span>
           <p className="mt-1 text-xs text-gray-400">
-            {ride.available_seats} seat{ride.available_seats !== 1 ? "s" : ""} left
+            {t("rides.seatsLeft", { count: ride.available_seats })}
           </p>
         </div>
       </div>
@@ -104,7 +107,7 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
 
       {ride.cost_per_person && (
         <p className="text-sm text-gray-500">
-          Rs {ride.cost_per_person} <span className="text-gray-400">per person</span>
+          Rs {ride.cost_per_person} <span className="text-gray-400">{t("rides.perPerson")}</span>
         </p>
       )}
 
@@ -116,16 +119,16 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
           disabled={loading || requested}
           className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
         >
-          {requested ? "Request pending" : loading ? "Sending..." : "Request to join"}
+          {requested ? t("rides.requestPending") : loading ? t("rides.sending") : t("rides.requestToJoin")}
         </button>
       )}
 
       {mode === "manage" && (
         <div className="space-y-2">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Requests ({requests.length})
+            {t("rides.requestsCount", { count: requests.length })}
           </p>
-          {requests.length === 0 && <p className="text-sm text-gray-400">No requests yet</p>}
+          {requests.length === 0 && <p className="text-sm text-gray-400">{t("rides.noRequestsYet")}</p>}
           {requests.map((req) => (
             <div
               key={req.id}
@@ -139,14 +142,14 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
                     disabled={loading}
                     className="text-xs px-2 py-1 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50"
                   >
-                    Accept
+                    {t("rides.accept")}
                   </button>
                   <button
                     onClick={() => handleRequestAction(req.id, "declined")}
                     disabled={loading}
                     className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
                   >
-                    Decline
+                    {t("rides.decline")}
                   </button>
                 </div>
               ) : (
@@ -155,7 +158,7 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
                     badgeClass[req.status] || badgeClass.pending
                   }`}
                 >
-                  {formatStatus(req.status)}
+                  {formatStatus(req.status, t)}
                 </span>
               )}
             </div>
@@ -167,7 +170,7 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
               disabled={loading}
               className="w-full py-1.5 border border-blue-200 text-blue-600 text-sm rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50"
             >
-              Start ride
+              {t("rides.startRide")}
             </button>
           )}
           {rideStatus === "in_progress" && (
@@ -176,7 +179,7 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
               disabled={loading}
               className="w-full py-1.5 border border-emerald-200 text-emerald-600 text-sm rounded-lg hover:bg-emerald-50 transition-colors disabled:opacity-50"
             >
-              Complete ride
+              {t("rides.completeRide")}
             </button>
           )}
           <button
@@ -184,7 +187,7 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
             disabled={loading || ["cancelled", "completed"].includes(rideStatus)}
             className="w-full py-1.5 border border-red-200 text-red-500 text-sm rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
           >
-            Cancel ride
+            {t("rides.cancelRide")}
           </button>
         </div>
       )}
@@ -192,13 +195,13 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
       {mode === "request" && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">Your request</span>
+            <span className="text-sm text-gray-500">{t("rides.yourRequest")}</span>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                 badgeClass[rideStatus] || badgeClass.pending
               }`}
             >
-              {formatStatus(rideStatus)}
+              {formatStatus(rideStatus, t)}
             </span>
           </div>
           {["pending", "accepted"].includes(rideStatus) && ride.request_id && (
@@ -207,7 +210,7 @@ export default function RideCard({ ride, mode = "find", requests = [], onRefresh
               disabled={loading}
               className="w-full py-1.5 border border-red-200 text-red-500 text-sm rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
             >
-              Cancel request
+              {t("rides.cancelRequest")}
             </button>
           )}
         </div>
