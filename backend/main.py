@@ -59,7 +59,10 @@ app = FastAPI(title="RideSync API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url],
+    allow_origins=[
+        "https://ridesync-frontend-7ye4.onrender.com",
+        "http://localhost:5173"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -138,7 +141,10 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     user = db.query(models.User).filter(models.User.email == form.username).first()
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    return {"access_token": create_access_token(user.id)}
+    return {
+    "access_token": create_access_token(user.id),
+    "token_type": "bearer"
+}
 
 
 @app.get("/users/me", response_model=schemas.UserOut)
