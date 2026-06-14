@@ -60,7 +60,7 @@ app = FastAPI(title="RideSync API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://ridesync-frontend-7ye4.onrender.com",
+        "https://ridesync-frontend-wi78.onrender.com",
         "http://localhost:5173"
     ],
     allow_credentials=True,
@@ -136,7 +136,7 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
     return user
 
 
-@app.post("/auth/login", response_model=schemas.Token)
+@app.post("/auth/login")
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == form.username).first()
     if not user or not verify_password(form.password, user.hashed_password):
