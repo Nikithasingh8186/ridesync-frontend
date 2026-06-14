@@ -7,7 +7,7 @@ import FindRide from "./pages/FindRide.jsx";
 import OfferRide from "./pages/OfferRide.jsx";
 import MyRides from "./pages/MyRide.jsx";
 import Stats from "./pages/Stats.jsx";
-import Requests from "./pages/Requests";
+import Requests from "./pages/Requests.jsx";
 import Settings from "./pages/Settings.jsx";
 import AI from "./pages/AI.jsx";
 // ---------- Auth context ----------
